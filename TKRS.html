@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registrace – Skate Závody Znojmo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f4f4f4;
+    }
+    form {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    button {
+      margin-top: 2rem;
+      padding: 0.7rem 1.5rem;
+      background-color: #222;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #444;
+    }
+    .guardian-consent {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #ffefef;
+      border: 1px solid #d00;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <form action="https://formspree.io/f/movwdlka" method="POST" id="registrationForm">
+    <h2>Registrace – Skate Závody Znojmo</h2>
+
+    <input type="hidden" name="_subject" value="Nová registrace – Skate Znojmo" />
+    <input type="hidden" name="_replyto" value="kubamahdal@gmail.com" />
+
+    <label for="name">Jméno a příjmení:</label>
+    <input type="text" id="name" name="name" required />
+
+    <label for="dob">Datum narození:</label>
+    <input type="date" id="dob" name="dob" required />
+
+    <label for="phone">Telefon / kontakt:</label>
+    <input type="text" id="phone" name="phone" required />
+
+    <label for="category">Kategorie:</label>
+    <select id="category" name="category" required>
+      <option value="mladsi">Mladší (do 15 let)</option>
+      <option value="starsi">Starší (15+ let)</option>
+    </select>
+
+    <label>
+      <input type="checkbox" name="consent" required />
+      Souhlasím s účastí na vlastní nebezpečí a s pravidly závodu.
+    </label>
+
+    <div class="guardian-consent" id="guardianConsentBlock">
+      <label for="guardianName">Jméno zákonného zástupce (povinné pro účastníky do 18 let):</label>
+      <input type="text" id="guardianName" name="guardianName" />
+
+      <label>
+        <input type="checkbox" id="guardianConsentCheckbox" name="guardianConsent" />
+        Jsem zákonný zástupce a dávám souhlas s účastí dítěte.
+      </label>
+    </div>
+
+    <button type="submit">Odeslat registraci</button>
+  </form>
+
+  <script>
+    const dobInput = document.getElementById('dob');
+    const guardianBlock = document.getElementById('guardianConsentBlock');
+    const guardianNameInput = document.getElementById('guardianName');
+    const guardianConsentCheckbox = document.getElementById('guardianConsentCheckbox');
+    const form = document.getElementById('registrationForm');
+
+    function calculateAge(birthday) {
+      const today = new Date();
+      const birthDate = new Date(birthday);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    function toggleGuardianConsent() {
+      const dobValue = dobInput.value;
+      if (!dobValue) {
+        guardianBlock.style.display = 'none';
+        guardianNameInput.required = false;
+        guardianConsentCheckbox.required = false;
+        return;
+      }
+      const age = calculateAge(dobValue);
+
+      if (age < 18) {
+        guardianBlock.style.display = 'block';
+        guardianNameInput.required = true;
+        guardianConsentCheckbox.required = true;
+      } else {
+        guardianBlock.style.display = 'none';
+        guardianNameInput.required = false;
+        guardianConsentCheckbox.required = false;
+      }
+    }
+
+    dobInput.addEventListener('change', toggleGuardianConsent);
+
+    // Při načtení stránky i zkontrolovat věk, pokud je datum vyplněné
+    window.addEventListener('load', toggleGuardianConsent);
+
+    form.addEventListener('submit', (e) => {
+      // dodatečná kontrola
+      if (dobInput.value) {
+        const age = calculateAge(dobInput.value);
+        if (age < 18) {
+          if (!guardianConsentCheckbox.checked || !guardianNameInput.value.trim()) {
+            e.preventDefault();
+            alert('Pro účastníky mladší 18 let je nutný souhlas zákonného zástupce.');
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
